@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Delivery Metrics</title>
+    <script src="sdk/scripts/polyfill.min.js"></script>
+    <script src="sdk/scripts/Chart.min.js"></script>
+    <script src="sdk/scripts/VSS.SDK.min.js"></script>
+    <script src="js/deliveryMetrics.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+        VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformStyles: true
+        });
+    </script>
+    <div class="hub-title">
+        <div title="Chart of delivery made by Team." class="backlog-page-title-area">Delivery Metrics</div>
+    </div>
+    <div class="right-hub-content" style="width: 100%; text-align: center; top: 45px">
+        <canvas width="667" height="333" id="canvas" style="width: 667px; height: 333px; display: inline;"></canvas>
+    </div>
+    <script type="text/javascript">
+        Strat1();
+    </script>
+</body>
+
+</html>
