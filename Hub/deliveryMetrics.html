@@ -25,8 +25,13 @@
     });
 
     var client = null;
+    var myTeam = null;
+    var teamContext;
     var dados = new Array();
+    var dataSet = new Array();
     var resultQueryLength = 0;
+    var state = "New";
+
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
     };
@@ -44,7 +49,7 @@
                 text: 'Lead Time'
             },
             legend: {
-                display: false //não mostra a lengenda do dataset
+                display: true //não mostra a lengenda do dataset
             },
             tooltips: {
                 mode: 'single',
@@ -82,42 +87,53 @@
         }
     };
 
-    VSS.require(["TFS/WorkItemTracking/RestClient", "TFS/Work/RestClient"], function(TFS_Wit_WebApi, TFS_Team_WebApi) {
+    LoadWI();
 
-        // Get a WIT client to make REST calls to VSTS
-        client = TFS_Wit_WebApi.getClient();
-        var myTeam = TFS_Team_WebApi.getClient();
-        var teamContext = {
-            project: VSS.getWebContext().project.name,
-            projectId: VSS.getWebContext().project.id,
-            team: VSS.getWebContext().team.name,
-            teamId: VSS.getWebContext().team.id
-        };
+    function LoadWI() {
+        VSS.require(["TFS/WorkItemTracking/RestClient", "TFS/Work/RestClient"], function(TFS_Wit_WebApi, TFS_Team_WebApi) {
 
-        myTeam.getTeamFieldValues(teamContext).then(function(areaPath) {
-            //criar consulta
-            //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
-            //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
-            var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " +
-                "AND [System.State] <> 'New' " +
-                "AND [System.State] <> 'Removed' "
+            // Get a WIT client to make REST calls to VSTS
+            client = TFS_Wit_WebApi.getClient();
+            myTeam = TFS_Team_WebApi.getClient();
+            teamContext = {
+                project: VSS.getWebContext().project.name,
+                projectId: VSS.getWebContext().project.id,
+                team: VSS.getWebContext().team.name,
+                teamId: VSS.getWebContext().team.id
+            };
 
-            areaPath.values.forEach(function(teamAreaPaths) {
-                whereConditions = whereConditions + "AND [System.AreaPath] under '" + teamAreaPaths.value + "' ";
+            myTeam.getTeamFieldValues(teamContext).then(function(areaPath) {
+                //criar consulta
+                client.queryByWiql(GetWiql(areaPath, state)).then(ResultQuery);
             });
 
-            var Wiql = {
-                query: "SELECT [System.Id],[System.Title] " +
-                    "FROM WorkItems " +
-                    "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 " +
-                    //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
-                    "AND [System.State] ever 'Approved' " +
-                    "AND " + whereConditions
-            };
-            client.queryByWiql(Wiql).then(ResultQuery);
+
         });
-        VSS.notifyLoadSucceeded();
-    });
+    }
+
+
+    function GetWiql(areaPath, stateEver) {
+
+        //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
+        //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
+        var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " +
+            "AND [System.State] <> 'New' " +
+            "AND [System.State] <> 'Removed' AND "
+
+
+        var teamAreaPaths = "([System.AreaPath] under '" + areaPath.values[0].value + "' ";
+        for (i = 1; i < areaPath.values.length; i++) {
+            teamAreaPaths += " OR [System.AreaPath] under '" + areaPath.values[i].value + "' ";
+        }
+
+        return Wiql = {
+            query: "SELECT [System.Id],[System.Title] " +
+                "FROM WorkItems " +
+                "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 " +
+                //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
+                "AND [System.State] ever '" + stateEver + "' AND " + whereConditions + teamAreaPaths + ")"
+        };
+    }
 
     function ResultQuery(resultQuery) {
 
@@ -132,10 +148,11 @@
         };
     }
 
+
     function ProcessRevisions(revisions) {
 
         var RevApproved = revisions.find(function(workItemRevision) {
-            return workItemRevision.fields["System.State"] == "Approved";
+            return workItemRevision.fields["System.State"] == state;
         });
 
         var RevDone = revisions.find(function(workItemRevision) {
@@ -152,13 +169,31 @@
             y: Math.round(produtionLeadTime)
         });
         if (dados.length == resultQueryLength) {
+            dataSet.push({
+                label: state,
+                data: dados
+            });
+        }
+        if (dataSet.length == 1 && state != "Approved") {
+            state = "Approved";
+            dados = new Array();
+            LoadWI();
+        }
+        if (dataSet.length == 2 && state != "Committed") {
+            state = "Committed";
+            dados = new Array();
+            LoadWI();
+        }
+        if (dataSet.length == 3) {
+            VSS.notifyLoadSucceeded();
             ShowChart();
         }
+
     }
 
     function ShowChart() {
 
-        config.data.datasets[0].data = dados;
+        config.data.datasets = dataSet;
         $.each(config.data.datasets, function(i, dataset) {
             dataset.borderColor = randomColor(0.4);
             dataset.backgroundColor = randomColor(0.1);
