@@ -141,18 +141,9 @@
                 resultQuery.workItems.forEach(function(workItem) {
                     client.getRevisions(workItem.id).then(ProcessRevisions);
                 });
-            } else if (state == "New") {
-                state = "Approved";
-                dados = new Array();
-                LoadWI();
-            } else if (dataSet.length == 1 && state != "Approved") {
-                state = "Committed";
-                dados = new Array();
-                LoadWI();
-            } else if (dataSet.length == 2 && state != "Committed") {
-                VSS.notifyLoadSucceeded();
-                ShowChart();
-            };
+            } else {
+                stepStates();
+            }
         };
     };
 
@@ -181,21 +172,25 @@
                 data: dados
             });
         }
-        if (dataSet.length == 1 && state != "Approved") {
+        stepStates()
+
+    }
+
+    function stepStates() {
+        if (state == "New") {
             state = "Approved";
             dados = new Array();
             LoadWI();
         }
-        if (dataSet.length == 2 && state != "Committed") {
+        if (state == "Approved") {
             state = "Committed";
             dados = new Array();
             LoadWI();
         }
-        if (dataSet.length == 3) {
+        if (state == "Approved") {
             VSS.notifyLoadSucceeded();
             ShowChart();
         }
-
     }
 
     function ShowChart() {

@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
     "id": "variability",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "name": "Delivery Variability",
     "description": "This chart shows how long each item took to be done",
     "publisher": "TJSP",
