@@ -107,7 +107,7 @@
                 client.queryByWiql(GetWiql(areaPath, state)).then(ResultQuery);
             });
         });
-    }
+    };
 
     function GetWiql(areaPath, stateEver) {
 
@@ -130,7 +130,7 @@
                 //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
                 "AND [System.State] ever '" + stateEver + "' AND " + whereConditions
         };
-    }
+    };
 
     function ResultQuery(resultQuery) {
 
@@ -141,12 +141,20 @@
                 resultQuery.workItems.forEach(function(workItem) {
                     client.getRevisions(workItem.id).then(ProcessRevisions);
                 });
-            } else {
-                return;
-            }
+            } else if (state == "New") {
+                state = "Approved";
+                dados = new Array();
+                LoadWI();
+            } else if (dataSet.length == 1 && state != "Approved") {
+                state = "Committed";
+                dados = new Array();
+                LoadWI();
+            } else if (dataSet.length == 2 && state != "Committed") {
+                VSS.notifyLoadSucceeded();
+                ShowChart();
+            };
         };
-    }
-
+    };
 
     function ProcessRevisions(revisions) {
 
