@@ -106,11 +106,8 @@
                 //criar consulta
                 client.queryByWiql(GetWiql(areaPath, state)).then(ResultQuery);
             });
-
-
         });
     }
-
 
     function GetWiql(areaPath, stateEver) {
 
@@ -125,13 +122,13 @@
         for (i = 1; i < areaPath.values.length; i++) {
             teamAreaPaths += " OR [System.AreaPath] under '" + areaPath.values[i].value + "' ";
         }
-
+        whereConditions += teamAreaPaths + ")";
         return Wiql = {
             query: "SELECT [System.Id],[System.Title] " +
                 "FROM WorkItems " +
                 "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 " +
                 //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
-                "AND [System.State] ever '" + stateEver + "' AND " + whereConditions + teamAreaPaths + ")"
+                "AND [System.State] ever '" + stateEver + "' AND " + whereConditions
         };
     }
 
