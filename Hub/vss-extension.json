@@ -1,10 +1,10 @@
 {
     "manifestVersion": 1,
     "id": "variability",
-    "version": "0.1.58",
+    "version": "0.1.61",
     "name": "Delivery Variability",
     "description": "This chart shows how long each item took to be done",
-    "publisher": "brunosouza",
+    "publisher": "TJSP",
     "icons": {
         "default": "img/graph.png"
     },
