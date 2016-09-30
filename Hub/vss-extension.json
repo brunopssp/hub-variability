@@ -1,17 +1,20 @@
 {
     "manifestVersion": 1,
-    "id": "sample-extension",
-    "version": "0.1.4",
-    "name": "My first sample extension",
-    "description": "A sample Visual Studio Services extension.",
-    "publisher": "fabrikamdev",
+    "id": "variability",
+    "version": "0.1.56",
+    "name": "Delivery Variability",
+    "description": "This chart shows how long each item took to be done",
+    "publisher": "TJSP",
+    "icons": {
+        "default": "img/graph.png"
+    },
     "targets": [{
         "id": "Microsoft.VisualStudio.Services"
     }],
     "contributions": [{
-        "id": "Fabrikam.HelloWorld",
+        "id": "variability",
         "type": "ms.vss-web.hub",
-        "description": "Adds a 'Hello' hub to the Work hub group.",
+        "description": "This chart shows how long each item took to be done",
         "targets": [
             "ms.vss-work-web.work-hub-group"
         ],
@@ -28,13 +31,12 @@
             "path": "deliveryMetrics.html",
             "addressable": true
         },
-
         {
             "path": "sdk/scripts",
             "addressable": true
         },
         {
-            "path": "js",
+            "path": "img",
             "addressable": true
         }
     ]
