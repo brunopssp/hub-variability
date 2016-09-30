@@ -8,6 +8,18 @@
     "icons": {
         "default": "img/graph.png"
     },
+    "categories": [
+        "Plan and track"
+    ],
+    "tags": [
+        "working",
+        "lead time",
+        "cycle time",
+        "throughput",
+        "agile",
+        "kanban",
+        "lean"
+    ],
     "targets": [{
         "id": "Microsoft.VisualStudio.Services"
     }],
