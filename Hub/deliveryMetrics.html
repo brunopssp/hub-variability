@@ -141,6 +141,8 @@
                 resultQuery.workItems.forEach(function(workItem) {
                     client.getRevisions(workItem.id).then(ProcessRevisions);
                 });
+            } else {
+                return;
             }
         };
     }
