@@ -172,7 +172,7 @@
                 data: dados
             });
         }
-        stepStates()
+        stepStates();
 
     }
 
@@ -181,12 +181,12 @@
             state = "Approved";
             dados = new Array();
             LoadWI();
-        }
+        } else
         if (state == "Approved") {
             state = "Committed";
             dados = new Array();
             LoadWI();
-        }
+        } else
         if (state == "Committed") {
             VSS.notifyLoadSucceeded();
             ShowChart();
