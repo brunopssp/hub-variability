@@ -34,6 +34,7 @@
     var state = "New";
     var Avg = 0;
     var DesvP = 0;
+    var stateDesvP = "Approved";
 
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
@@ -188,12 +189,12 @@
                 }
             } //Após carregar todos os valores, calcular o desvio padrão e excluir itens que estão maior que (Media + DesvP*2) antes de carregar dataset
 
-            if (state == "Approved") {
+            if (state == stateDesvP) {
                 DesvP = computeStdDeviation(dados); //necessário recarregar as variávies e criar as linhas de desvio padrão
             }
             dataSet.push({
                 label: state,
-                hidden: (state != "Approved"),
+                hidden: (state != stateDesvP),
                 data: dados
             });
             stepStates();
@@ -210,6 +211,8 @@
         if (state == "Approved") {
             state = "Committed";
             dados = new Array();
+            if (resultQueryLength == 0)
+                stateDesvP = "New";
             LoadWI();
         } else
         if (state == "Committed") {
