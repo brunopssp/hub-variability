@@ -32,6 +32,7 @@
     var resultQueryLength = 0;
     var state = "New";
     var Avg = 0;
+    var DesvP = 0;
 
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
@@ -83,6 +84,17 @@
                         display: true,
                         labelString: 'Days'
                     }
+                }]
+            },
+            annotation: {
+                annotations: [{
+                    type: 'line',
+                    mode: 'horizontal',
+                    scaleID: 'y-axis-1',
+                    value: Avg,
+                    borderColor: 'red',
+                    borderWidth: 2,
+                    borderDash: [2, 2]
                 }]
             }
         }
@@ -169,12 +181,13 @@
         });
         if (dados.length == resultQueryLength) {
             Avg = 0;
+            var DesvP = 0;
 
-            var DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
+            DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
             for (var i = dados.length - 1; i--;) {
                 if (dados[i].y > (mean + (DesvP * 2))) dados.splice(i, 1);
             } //Após carregar todos os valores, calcular o desvio padrão e excluir itens que estão maior que (Media + DesvP*2) antes de carregar dataset
-
+            DesvP = computeStdDeviation(dados);
             dataSet.push({
                 label: state,
                 data: dados
@@ -215,9 +228,46 @@
 
         Chart.defaults.global.responsive = false;
         var ctx = document.getElementById("canvas").getContext("2d");
-
+        LoadNotations();
         new Chart.Scatter(ctx, config);
     };
+
+    function LoadNotations() {
+        config.options.annotation.annotations.push({
+            type: 'line',
+            mode: 'horizontal',
+            scaleID: 'y-axis-1',
+            value: Avg + (DesvP),
+            borderColor: 'blue',
+            borderWidth: 2
+        });
+        config.options.annotation.annotations.push({
+            type: 'line',
+            mode: 'horizontal',
+            scaleID: 'y-axis-1',
+            value: Avg - (DesvP),
+            borderColor: 'blue',
+            borderWidth: 2
+        });
+        config.options.annotation.annotations.push({
+            type: 'line',
+            mode: 'horizontal',
+            scaleID: 'y-axis-1',
+            value: Avg + (DesvP * 2),
+            borderColor: 'green',
+            borderWidth: 2
+        });
+        if (Avg - (DesvP * 2) > 0) {
+            config.options.annotation.annotations.push({
+                type: 'line',
+                mode: 'horizontal',
+                scaleID: 'y-axis-1',
+                value: Avg - (DesvP * 2),
+                borderColor: 'green',
+                borderWidth: 2
+            });
+        }
+    }
 
     function DaysBetween(date1, date2) {
         //Get 1 day in milliseconds
@@ -239,7 +289,7 @@
         for (var i = 0; i < values.length; i++)
             total += values[i].y;
         return total / values.length
-    }
+    } //http://elemarjr.com/pt/2011/11/11/functional-programming-map-e-reduce-com-javascript/
 
     function computeStdDeviation(values) {
         Avg = computeAvg(values);
