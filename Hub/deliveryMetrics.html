@@ -211,8 +211,10 @@
         if (state == "Approved") {
             state = "Committed";
             dados = new Array();
-            if (resultQueryLength == 0)
+            if (resultQueryLength == 0) {
                 stateDesvP = "New";
+                dataSet[0].hidden = false;
+            }
             LoadWI();
         } else
         if (state == "Committed") {
