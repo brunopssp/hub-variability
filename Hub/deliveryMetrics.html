@@ -185,7 +185,9 @@
 
             DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
             for (var i = dados.length - 1; i--;) {
-                if (dados[i].y > (mean + (DesvP * 2))) dados.splice(i, 1);
+                if (dados[i].y > (Avg + (DesvP * 2))) {
+                    dados.splice(i, 1);
+                }
             } //Após carregar todos os valores, calcular o desvio padrão e excluir itens que estão maior que (Media + DesvP*2) antes de carregar dataset
             DesvP = computeStdDeviation(dados);
             dataSet.push({
