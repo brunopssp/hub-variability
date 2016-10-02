@@ -244,41 +244,43 @@
             borderWidth: 2,
             borderDash: [2, 2]
         });
-        config.options.annotation.annotations.push({
-            type: 'line',
-            mode: 'horizontal',
-            scaleID: 'y-axis-1',
-            value: Avg + (DesvP),
-            borderColor: 'blue',
-            borderWidth: 2
-        });
-        if (Avg - (DesvP * 2) > 0) {
+        if (DesvP > 0) {
             config.options.annotation.annotations.push({
                 type: 'line',
                 mode: 'horizontal',
                 scaleID: 'y-axis-1',
-                value: Avg - (DesvP),
+                value: Avg + (DesvP),
                 borderColor: 'blue',
                 borderWidth: 2
             });
-        }
-        config.options.annotation.annotations.push({
-            type: 'line',
-            mode: 'horizontal',
-            scaleID: 'y-axis-1',
-            value: Avg + (DesvP * 2),
-            borderColor: 'green',
-            borderWidth: 2
-        });
-        if (Avg - (DesvP * 2) > 0) {
+            if (Avg - (DesvP * 2) > 0) {
+                config.options.annotation.annotations.push({
+                    type: 'line',
+                    mode: 'horizontal',
+                    scaleID: 'y-axis-1',
+                    value: Avg - (DesvP),
+                    borderColor: 'blue',
+                    borderWidth: 2
+                });
+            }
             config.options.annotation.annotations.push({
                 type: 'line',
                 mode: 'horizontal',
                 scaleID: 'y-axis-1',
-                value: Avg - (DesvP * 2),
+                value: Avg + (DesvP * 2),
                 borderColor: 'green',
                 borderWidth: 2
             });
+            if (Avg - (DesvP * 2) > 0) {
+                config.options.annotation.annotations.push({
+                    type: 'line',
+                    mode: 'horizontal',
+                    scaleID: 'y-axis-1',
+                    value: Avg - (DesvP * 2),
+                    borderColor: 'green',
+                    borderWidth: 2
+                });
+            }
         }
     }
 
