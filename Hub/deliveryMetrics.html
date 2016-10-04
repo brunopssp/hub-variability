@@ -242,15 +242,13 @@
         } else
         if (state == "Committed") {
             VSS.notifyLoadSucceeded();
-            //ShowChart();
 
             config.data.datasets = dataSet;
             $.each(config.data.datasets, function(i, dataset) {
-                dataset.borderColor = randomColor(0.4);
-                dataset.backgroundColor = randomColor(0.1);
-                dataset.pointBorderColor = randomColor(0.7);
-                dataset.pointBackgroundColor = randomColor(0.5);
-                dataset.pointBorderWidth = 1;
+                dataset.borderWidth = 0;
+                dataset.backgroundColor = randomColor(0.9);
+                dataset.pointBackgroundColor = dataset.backgroundColor;
+                dataset.pointRadius = 5;
                 dataset.fill = false;
                 dataset.showLine = false;
             });
@@ -329,7 +327,6 @@
         }
         return notations;
     }
-
 
     function DaysBetween(date1, date2) {
         //Get 1 day in milliseconds
