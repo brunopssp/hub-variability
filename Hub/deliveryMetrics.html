@@ -33,8 +33,7 @@
     var resultQueryLength = 0;
     var state = "New";
     var Avg = 0;
-    var DesvP = 0;
-    var stateDesvP = "Approved";
+    var stateDesvP = "Committed";
 
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
@@ -53,7 +52,35 @@
                 text: 'Lead Time'
             },
             legend: {
-                display: true //não mostra a lengenda do dataset
+                display: true,
+                onClick: function(event, legendItem) {
+                    //legendItem.hidden = !legendItem.hidden;
+                    Chart.defaults.global.legend.onClick.call(this, event, legendItem);
+
+                    var dtChart = this.chart.data;
+                    var legends = this.chart.legend.legendItems;
+                    this.chart.options.annotation.annotations = new Array();
+                    var annotationObjects = this.chart._annotationObjects = [];
+
+                    for (var i = 0; i < legends.length; i++) { //foreach hidden, if false carrega linha de desvio padrão;
+                        if (legends[i].hidden == false) {
+
+                            this.chart.options.annotation.annotations = LoadNotations(dtChart.datasets[legends[i].datasetIndex].data);
+
+                            this.chart.options.annotation.annotations.forEach(function(configuration, i) {
+                                var Constructor = Chart.Annotation.annotationTypes[configuration.type];
+                                if (Constructor) {
+                                    annotationObjects.push(new Constructor({
+                                        _index: i
+                                    }));
+                                }
+                            }); //reset no atributo _annotationObjects. isso é um bug no Annotation qdo o numero de linhas mudam de um dataset para outro
+
+                            break;
+                        };
+                    };
+                    this.chart.update();
+                }
             },
             tooltips: {
                 mode: 'single',
@@ -133,7 +160,7 @@
         return Wiql = {
             query: "SELECT [System.Id],[System.Title] " +
                 "FROM WorkItems " +
-                "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 " +
+                "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 60 " +
                 //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
                 "AND [System.State] ever '" + stateEver + "' AND " + whereConditions
         };
@@ -149,7 +176,7 @@
                     client.getRevisions(workItem.id).then(ProcessRevisions);
                 });
             } else {
-                stepStates();
+                ShowChart();
             }
         };
     };
@@ -174,27 +201,31 @@
             y: Math.round(produtionLeadTime)
         });
         if (dados.length == resultQueryLength) {
-            DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
+            var DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
+
             for (var i = dados.length - 1; i--;) { //Objetivo: eliminar anomalias no grafico
                 if (dados[i].y > (Avg + (DesvP * 2))) {
                     dados.splice(i, 1);
                 }
             } //Após carregar todos os valores, calcular o desvio padrão e excluir itens que estão maior que (Media + DesvP*2) antes de carregar dataset
-
             if (state == stateDesvP) {
-                DesvP = computeStdDeviation(dados); //necessário recarregar as variávies e criar as linhas de desvio padrão
+                config.options.annotation.annotations = new Array();
+                config.options.annotation.annotations = LoadNotations(dados);
             }
+
             dataSet.push({
                 label: state,
                 hidden: (state != stateDesvP),
                 data: dados
             });
-            stepStates();
+
+            ShowChart();
             dados = new Array();
         }
     }
 
-    function stepStates() {
+    function ShowChart() {
+
         if (state == "New") {
             state = "Approved";
             dados = new Array();
@@ -211,31 +242,41 @@
         } else
         if (state == "Committed") {
             VSS.notifyLoadSucceeded();
-            ShowChart();
+            //ShowChart();
+
+            config.data.datasets = dataSet;
+            $.each(config.data.datasets, function(i, dataset) {
+                dataset.borderColor = randomColor(0.4);
+                dataset.backgroundColor = randomColor(0.1);
+                dataset.pointBorderColor = randomColor(0.7);
+                dataset.pointBackgroundColor = randomColor(0.5);
+                dataset.pointBorderWidth = 1;
+                dataset.fill = false;
+                dataset.showLine = false;
+            });
+
+            Chart.defaults.global.responsive = false;
+            var ctx = document.getElementById("canvas").getContext("2d");
+
+            new Chart.Scatter(ctx, config);
         }
-    }
-
-    function ShowChart() {
-
-        config.data.datasets = dataSet;
-        $.each(config.data.datasets, function(i, dataset) {
-            dataset.borderColor = randomColor(0.4);
-            dataset.backgroundColor = randomColor(0.1);
-            dataset.pointBorderColor = randomColor(0.7);
-            dataset.pointBackgroundColor = randomColor(0.5);
-            dataset.pointBorderWidth = 1;
-            dataset.fill = false;
-            dataset.showLine = false;
-        });
-
-        Chart.defaults.global.responsive = false;
-        var ctx = document.getElementById("canvas").getContext("2d");
-        LoadNotations();
-        new Chart.Scatter(ctx, config);
     };
 
-    function LoadNotations() {
-        config.options.annotation.annotations.push({
+    function LoadNotations(dadosDesP) {
+        var maxData = 0;
+
+        var DesvP = computeStdDeviation(dadosDesP); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
+        for (var i = dadosDesP.length - 1; i--;) {
+            if (dadosDesP[i].y > (Avg + (DesvP * 2))) {
+                maxData = Math.max(dadosDesP[i].y);
+            } else
+            if (dadosDesP[i].y > (Avg + DesvP)) {
+                maxData = Math.max(dadosDesP[i].y);
+            }
+        }
+
+        var notations = new Array();
+        notations.push({
             type: 'line',
             mode: 'horizontal',
             scaleID: 'y-axis-1',
@@ -245,34 +286,38 @@
             borderDash: [2, 2]
         });
         if (DesvP > 0) {
-            config.options.annotation.annotations.push({
-                type: 'line',
-                mode: 'horizontal',
-                scaleID: 'y-axis-1',
-                value: Avg + (DesvP),
-                borderColor: 'blue',
-                borderWidth: 2
-            });
-            if (Avg - (DesvP * 2) > 0) {
-                config.options.annotation.annotations.push({
+            if (maxData == 0 || Avg + DesvP < maxData) {
+                notations.push({
                     type: 'line',
                     mode: 'horizontal',
                     scaleID: 'y-axis-1',
-                    value: Avg - (DesvP),
+                    value: Avg + DesvP,
                     borderColor: 'blue',
                     borderWidth: 2
                 });
             }
-            config.options.annotation.annotations.push({
-                type: 'line',
-                mode: 'horizontal',
-                scaleID: 'y-axis-1',
-                value: Avg + (DesvP * 2),
-                borderColor: 'green',
-                borderWidth: 2
-            });
+            if (Avg - DesvP > 0) {
+                notations.push({
+                    type: 'line',
+                    mode: 'horizontal',
+                    scaleID: 'y-axis-1',
+                    value: Avg - DesvP,
+                    borderColor: 'blue',
+                    borderWidth: 2
+                });
+            }
+            if (maxData == 0 || Avg + (DesvP * 2) < maxData) {
+                notations.push({
+                    type: 'line',
+                    mode: 'horizontal',
+                    scaleID: 'y-axis-1',
+                    value: Avg + (DesvP * 2),
+                    borderColor: 'green',
+                    borderWidth: 2
+                });
+            }
             if (Avg - (DesvP * 2) > 0) {
-                config.options.annotation.annotations.push({
+                notations.push({
                     type: 'line',
                     mode: 'horizontal',
                     scaleID: 'y-axis-1',
@@ -282,7 +327,9 @@
                 });
             }
         }
+        return notations;
     }
+
 
     function DaysBetween(date1, date2) {
         //Get 1 day in milliseconds
