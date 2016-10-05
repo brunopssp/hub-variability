@@ -9,6 +9,14 @@
     "icons": {
         "default": "img/graph.png"
     },
+    "screenshots": [{
+        "path": "img/screenshot.png"
+    }],
+    "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    },
     "categories": [
         "Plan and track"
     ],
