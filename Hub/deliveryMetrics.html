@@ -272,64 +272,67 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             if (dadosDesP[i].y > (Avg + (DesvP * 2))) {
                 maxData = Math.max(dadosDesP[i].y);
             } else
-            if ((dadosDesP[i].y *= 1.05) > (Avg + DesvP)) {
+            if ((a = function() {
+                    dadosDesP[i].y * 1.05;
+                }) > (Avg + DesvP))
                 maxData = Math.max(dadosDesP[i].y);
-            }
         }
+    }
 
-        var notations = new Array();
-        notations.push({
-            type: 'line',
-            mode: 'horizontal',
-            scaleID: 'y-axis-1',
-            value: Avg,
-            borderColor: 'red',
-            borderWidth: 2,
-            borderDash: [2, 2]
-        });
-        if (DesvP > 0) {
-            if (maxData == 0 || Avg + DesvP < maxData) {
+
+    var notations = new Array();
+    notations.push({
+        type: 'line',
+        mode: 'horizontal',
+        scaleID: 'y-axis-1',
+        value: Avg,
+        borderColor: 'red',
+        borderWidth: 2,
+        borderDash: [2, 2]
+    });
+    if (DesvP > 0) {
+        if (maxData == 0 || Avg + DesvP < maxData) {
+            notations.push({
+                type: 'line',
+                mode: 'horizontal',
+                scaleID: 'y-axis-1',
+                value: Avg + DesvP,
+                borderColor: 'blue',
+                borderWidth: 2
+            });
+            if (Avg - DesvP > 0) {
                 notations.push({
                     type: 'line',
                     mode: 'horizontal',
                     scaleID: 'y-axis-1',
-                    value: Avg + DesvP,
+                    value: Avg - DesvP,
                     borderColor: 'blue',
                     borderWidth: 2
                 });
-                if (Avg - DesvP > 0) {
-                    notations.push({
-                        type: 'line',
-                        mode: 'horizontal',
-                        scaleID: 'y-axis-1',
-                        value: Avg - DesvP,
-                        borderColor: 'blue',
-                        borderWidth: 2
-                    });
-                };
             };
-            if (maxData == 0 || Avg + (DesvP * 2) < maxData) {
+        };
+        if (maxData == 0 || Avg + (DesvP * 2) < maxData) {
+            notations.push({
+                type: 'line',
+                mode: 'horizontal',
+                scaleID: 'y-axis-1',
+                value: Avg + (DesvP * 2),
+                borderColor: 'green',
+                borderWidth: 2
+            });
+            if (Avg - (DesvP * 2) > 0) {
                 notations.push({
                     type: 'line',
                     mode: 'horizontal',
                     scaleID: 'y-axis-1',
-                    value: Avg + (DesvP * 2),
+                    value: Avg - (DesvP * 2),
                     borderColor: 'green',
                     borderWidth: 2
                 });
-                if (Avg - (DesvP * 2) > 0) {
-                    notations.push({
-                        type: 'line',
-                        mode: 'horizontal',
-                        scaleID: 'y-axis-1',
-                        value: Avg - (DesvP * 2),
-                        borderColor: 'green',
-                        borderWidth: 2
-                    });
-                };
             };
         };
-        return notations;
+    };
+    return notations;
     }
 
     function DaysBetween(date1, date2) {
