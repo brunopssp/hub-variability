@@ -53,6 +53,10 @@
             "addressable": true
         },
         {
+            "path": "sdk/scripts",
+            "addressable": true
+        },
+        {
             "path": "img",
             "addressable": true
         }
