@@ -41,7 +41,6 @@ Please note: None of the conditions outlined in the disclaimer above will superc
     var resultQueryLength = 0;
     var state = "New";
     var Avg = 0;
-    var stateDesvP = "Committed";
 
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
@@ -216,14 +215,10 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                     dados.splice(i, 1);
                 }
             } //Após carregar todos os valores, calcular o desvio padrão e excluir itens que estão maior que (Media + DesvP*2) antes de carregar dataset
-            if (state == stateDesvP) {
-                config.options.annotation.annotations = new Array();
-                config.options.annotation.annotations = LoadNotations(dados);
-            }
 
             dataSet.push({
                 label: state,
-                hidden: (state != stateDesvP),
+                hidden: true,
                 data: dados
             });
 
@@ -236,16 +231,12 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 
         if (state == "New") {
             state = "Approved";
-            dados = new Array();
+            //dados = new Array();
             LoadWI();
         } else
         if (state == "Approved") {
             state = "Committed";
-            dados = new Array();
-            if (resultQueryLength == 0) {
-                stateDesvP = "New";
-                dataSet[0].hidden = false;
-            }
+            //dados = new Array();
             LoadWI();
         } else
         if (state == "Committed") {
@@ -260,6 +251,11 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                 dataset.fill = false;
                 dataset.showLine = false;
             });
+
+            var lastDataset = config.data.datasets.length - 1;
+            config.data.datasets[lastDataset].hidden = false;
+            config.options.annotation.annotations = new Array();
+            config.options.annotation.annotations = LoadNotations(config.data.datasets[lastDataset].data);
 
             Chart.defaults.global.responsive = false;
             var ctx = document.getElementById("canvas").getContext("2d");
