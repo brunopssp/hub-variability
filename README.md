@@ -17,7 +17,7 @@ This chart shows how long each item took to be done.
 	vss-extension.json
 ####Package the extension
 	npm i -g tfx-cli
-	cd <pasta da extensão onde o vss-extension.json está>
+	cd <folder of the extension where the vss-extension.json exists>
 	tfx extension create
 ####Upload and Install
 https://www.visualstudio.com/en-us/docs/marketplace/get-tfs-extensions#upload-to-team-foundation-server
