@@ -272,7 +272,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             if (dadosDesP[i].y > (Avg + (DesvP * 2))) {
                 maxData = Math.max(dadosDesP[i].y);
             } else
-            if (dadosDesP[i].y > (Avg + DesvP)) {
+            if ((dadosDesP[i].y *= 1.05) > (Avg + DesvP)) {
                 maxData = Math.max(dadosDesP[i].y);
             }
         }
