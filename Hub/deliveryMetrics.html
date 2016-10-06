@@ -210,7 +210,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         if (dados.length == resultQueryLength) {
             var DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
 
-            for (var i = dados.length - 1; i--;) { //Objetivo: eliminar anomalias no grafico
+            for (var i = dados.length; i--;) { //Objetivo: eliminar anomalias no grafico
                 if (dados[i].y > (Avg + (DesvP * 2))) {
                     dados.splice(i, 1);
                 }
@@ -268,7 +268,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         var maxData = 0;
 
         var DesvP = computeStdDeviation(dadosDesP); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
-        for (var i = dadosDesP.length - 1; i--;) {
+        for (var i = dadosDesP.length; i--;) {
             if (dadosDesP[i].y > (Avg + (DesvP * 2))) {
                 maxData = Math.max(dadosDesP[i].y);
             } else
@@ -297,17 +297,17 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                     borderColor: 'blue',
                     borderWidth: 2
                 });
-            }
-            if (Avg - DesvP > 0) {
-                notations.push({
-                    type: 'line',
-                    mode: 'horizontal',
-                    scaleID: 'y-axis-1',
-                    value: Avg - DesvP,
-                    borderColor: 'blue',
-                    borderWidth: 2
-                });
-            }
+                if (Avg - DesvP > 0) {
+                    notations.push({
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'y-axis-1',
+                        value: Avg - DesvP,
+                        borderColor: 'blue',
+                        borderWidth: 2
+                    });
+                };
+            };
             if (maxData == 0 || Avg + (DesvP * 2) < maxData) {
                 notations.push({
                     type: 'line',
@@ -317,18 +317,18 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                     borderColor: 'green',
                     borderWidth: 2
                 });
-            }
-            if (Avg - (DesvP * 2) > 0) {
-                notations.push({
-                    type: 'line',
-                    mode: 'horizontal',
-                    scaleID: 'y-axis-1',
-                    value: Avg - (DesvP * 2),
-                    borderColor: 'green',
-                    borderWidth: 2
-                });
-            }
-        }
+                if (Avg - (DesvP * 2) > 0) {
+                    notations.push({
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'y-axis-1',
+                        value: Avg - (DesvP * 2),
+                        borderColor: 'green',
+                        borderWidth: 2
+                    });
+                };
+            };
+        };
         return notations;
     }
 
