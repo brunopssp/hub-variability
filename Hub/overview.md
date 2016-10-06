@@ -1,6 +1,6 @@
 This chart shows how long each item took to be done.
 
-# Delivery Variability Hub
+## Delivery Variability Hub
 
 According to David Anderson, a Kanban implementation has 5 Central Properties:
 
