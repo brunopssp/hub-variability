@@ -270,10 +270,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         var DesvP = computeStdDeviation(dadosDesP); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
 
         for (var i = dadosDesP.length; i--;) {
-            if (dadosDesP[i].y > (Avg + (DesvP * 2))) {
-                maxData = dadosDesP[i].y;
-            } else
-            if ((dadosDesP[i].y * 1.05) > Avg + DesvP) {
+            if (dadosDesP[i].y > maxData) {
                 maxData = dadosDesP[i].y;
             };
         };
