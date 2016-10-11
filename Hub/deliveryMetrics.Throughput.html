@@ -53,7 +53,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         var weeksInTheFuture = eval(weekNo - weekNoToday);
         d1.setDate(d1.getDate() + eval(7 * weeksInTheFuture));
         return eval(d1.getMonth() + 1) + "/" + d1.getDate() + "/" + d1.getFullYear();
-    };
+    }; //https://gist.github.com/Abhinav1217/5038863
 
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
@@ -181,9 +181,14 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             closedDates.push(new Date(workItem.fields["Microsoft.VSTS.Common.ClosedDate"]));
         });
 
-        var actual = closedDates[0].getWeekNumber();
         var sumItens = 0;
         var dados = new Array();
+
+        closedDates.sort(function(a, b) {
+            return a - b;
+        });
+
+        var actual = closedDates[0].getWeekNumber();
 
         for (var i = 0; i < closedDates.length; i++) {
             var weekday = closedDates[i].getWeekNumber();
