@@ -36,11 +36,24 @@ Please note: None of the conditions outlined in the disclaimer above will superc
     var client = null;
     var myTeam = null;
     var teamContext;
-    var dados = new Array();
-    var dataSet = new Array();
-    var resultQueryLength = 0;
-    var state = "New";
     var Avg = 0;
+
+    Date.prototype.getWeekNumber = function() {
+        var d = new Date(+this);
+        d.setHours(0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
+    }; //http://stackoverflow.com/questions/6117814/get-week-of-year-in-javascript-like-in-php
+
+    function getDateRangeOfWeek(weekNo, actualYear) {
+        var d1 = new Date(actualYear, 00, 01);
+        numOfdaysPastSinceLastMonday = eval(d1.getDay() - 1);
+        d1.setDate(d1.getDate() - numOfdaysPastSinceLastMonday);
+        var weekNoToday = d1.getWeekNumber();
+        var weeksInTheFuture = eval(weekNo - weekNoToday);
+        d1.setDate(d1.getDate() + eval(7 * weeksInTheFuture));
+        return eval(d1.getMonth() + 1) + "/" + d1.getDate() + "/" + d1.getFullYear();
+    };
 
     var randomColor = function(opacity) {
         return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + (opacity || '.3') + ')';
@@ -56,38 +69,10 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         options: {
             title: {
                 display: true,
-                text: 'Lead Time'
+                text: 'Throughput'
             },
             legend: {
-                display: true,
-                onClick: function(event, legendItem) {
-                    //legendItem.hidden = !legendItem.hidden;
-                    Chart.defaults.global.legend.onClick.call(this, event, legendItem);
-
-                    var dtChart = this.chart.data;
-                    var legends = this.chart.legend.legendItems;
-                    this.chart.options.annotation.annotations = new Array();
-                    var annotationObjects = this.chart._annotationObjects = [];
-
-                    for (var i = 0; i < legends.length; i++) { //foreach hidden, if false carrega linha de desvio padrão;
-                        if (legends[i].hidden == false) {
-
-                            this.chart.options.annotation.annotations = LoadNotations(dtChart.datasets[legends[i].datasetIndex].data);
-
-                            this.chart.options.annotation.annotations.forEach(function(configuration, i) {
-                                var Constructor = Chart.Annotation.annotationTypes[configuration.type];
-                                if (Constructor) {
-                                    annotationObjects.push(new Constructor({
-                                        _index: i
-                                    }));
-                                }
-                            }); //reset no atributo _annotationObjects. isso é um bug no Annotation qdo o numero de linhas mudam de um dataset para outro
-
-                            break;
-                        };
-                    };
-                    this.chart.update();
-                }
+                display: false
             },
             tooltips: {
                 mode: 'single',
@@ -145,12 +130,12 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 
             myTeam.getTeamFieldValues(teamContext).then(function(areaPath) {
                 //criar consulta
-                client.queryByWiql(GetWiql(areaPath, state)).then(ResultQuery);
+                client.queryByWiql(GetWiql(areaPath)).then(ResultQuery);
             });
         });
     };
 
-    function GetWiql(areaPath, stateEver) {
+    function GetWiql(areaPath) {
 
         //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
         //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
@@ -163,13 +148,13 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         for (i = 1; i < areaPath.values.length; i++) {
             teamAreaPaths += " OR [System.AreaPath] under '" + areaPath.values[i].value + "' ";
         }
-        whereConditions += teamAreaPaths + ")";
+        whereConditions += teamAreaPaths + ") ";
         return Wiql = {
             query: "SELECT [System.Id],[System.Title] " +
                 "FROM WorkItems " +
-                "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 60 " +
-                //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
-                "AND [System.State] ever '" + stateEver + "' AND " + whereConditions
+                "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 and " + whereConditions +
+                //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' and " + whereConditions +
+                "ORDER BY [Microsoft.VSTS.Common.ClosedDate] ASC"
         };
     };
 
@@ -177,91 +162,70 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 
         //ForEach workItem in query, get the respective Revision
         if (resultQuery.queryType == 1) { //flat query
-            resultQueryLength = resultQuery.workItems.length;
-            if (resultQueryLength > 0) {
+            if (resultQuery.workItems.length > 0) {
+                var ids = new Array();
                 resultQuery.workItems.forEach(function(workItem) {
-                    client.getRevisions(workItem.id).then(ProcessRevisions);
+                    ids.push(workItem.id);
                 });
+                client.getWorkItems(ids).then(processWorkItems);
             } else {
                 ShowChart();
             }
         };
     };
 
-    function ProcessRevisions(revisions) {
+    function processWorkItems(workItems) {
 
-        var RevApproved = revisions.find(function(workItemRevision) {
-            return workItemRevision.fields["System.State"] == state;
+        var closedDates = new Array();
+        workItems.forEach(function(workItem) {
+            closedDates.push(new Date(workItem.fields["Microsoft.VSTS.Common.ClosedDate"]));
         });
 
-        var RevDone = revisions.find(function(workItemRevision) {
-            return workItemRevision.fields["System.State"] == "Done";
-        });
+        var actual = closedDates[0].getWeekNumber();
+        var sumItens = 0;
+        var dados = new Array();
 
-        var dateApproved = (RevApproved != null && RevApproved.fields != undefined) ? new Date(RevApproved.fields["System.ChangedDate"]) : new Date();
-        var dateDone = (RevDone != null && RevDone.fields != undefined) ? new Date(RevDone.fields["System.ChangedDate"]) : new Date();
-
-        var produtionLeadTime = DaysBetween(dateApproved, dateDone)
-
-        dados.push({
-            x: dateDone.toLocaleDateString("pt-BR"),
-            y: Math.round(produtionLeadTime)
-        });
-        if (dados.length == resultQueryLength) {
-            var DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
-
-            for (var i = dados.length; i--;) { //Objetivo: eliminar anomalias no grafico
-                if (dados[i].y > (Avg + (DesvP * 2))) {
-                    dados.splice(i, 1);
-                }
-            } //Após carregar todos os valores, calcular o desvio padrão e excluir itens que estão maior que (Media + DesvP*2) antes de carregar dataset
-
-            dataSet.push({
-                label: state,
-                hidden: true,
-                data: dados
-            });
-
-            ShowChart();
-            dados = new Array();
+        for (var i = 0; i < closedDates.length; i++) {
+            var weekday = closedDates[i].getWeekNumber();
+            if (weekday == actual) {
+                sumItens += 1;
+            } else {
+                dados.push({
+                    x: new Date(getDateRangeOfWeek(actual, closedDates[i].getFullYear())).toLocaleDateString("pt-BR"),
+                    y: sumItens,
+                });
+                actual = weekday;
+                i = i - 1;
+                sumItens = 0;
+            }
         }
+
+        var DesvP = computeStdDeviation(dados); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
+
+        config.data.datasets[0].data = dados;
+
+        ShowChart();
     }
 
     function ShowChart() {
 
-        if (state == "New") {
-            state = "Approved";
-            //dados = new Array();
-            LoadWI();
-        } else
-        if (state == "Approved") {
-            state = "Committed";
-            //dados = new Array();
-            LoadWI();
-        } else
-        if (state == "Committed") {
-            VSS.notifyLoadSucceeded();
+        VSS.notifyLoadSucceeded();
 
-            config.data.datasets = dataSet;
-            $.each(config.data.datasets, function(i, dataset) {
-                dataset.borderWidth = 0;
-                dataset.backgroundColor = randomColor(0.9);
-                dataset.pointBackgroundColor = dataset.backgroundColor;
-                dataset.pointRadius = 5;
-                dataset.fill = false;
-                dataset.showLine = false;
-            });
+        $.each(config.data.datasets, function(i, dataset) {
+            dataset.borderWidth = 0;
+            dataset.backgroundColor = randomColor(0.9);
+            dataset.pointBackgroundColor = dataset.backgroundColor;
+            dataset.pointRadius = 5;
+            dataset.fill = false;
+            dataset.showLine = false;
+        });
 
-            var lastDataset = config.data.datasets.length - 1;
-            config.data.datasets[lastDataset].hidden = false;
-            config.options.annotation.annotations = new Array();
-            config.options.annotation.annotations = LoadNotations(config.data.datasets[lastDataset].data);
+        config.options.annotation.annotations = LoadNotations(config.data.datasets[0].data);
 
-            Chart.defaults.global.responsive = false;
-            var ctx = document.getElementById("canvas").getContext("2d");
+        Chart.defaults.global.responsive = false;
+        var ctx = document.getElementById("canvas").getContext("2d");
 
-            new Chart.Scatter(ctx, config);
-        }
+        new Chart.Scatter(ctx, config);
     };
 
     function LoadNotations(dadosDesP) {
