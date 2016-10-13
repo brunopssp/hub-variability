@@ -46,6 +46,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             resultQuery.workItems.forEach(function(workItem) {
                 ids.push(workItem.id);
             });
+            ids.splice(0, (ids.length - 1) - 240); //limit the process to 240 items
             client.getWorkItems(ids).then(processWorkItems);
         } else {
             ShowChart();
