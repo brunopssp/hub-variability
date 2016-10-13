@@ -82,6 +82,10 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                 sumItens = 0;
             }
         }
+        dados.push({
+            x: new Date(getDateRangeOfWeek(actual, closedDates[i].getFullYear())).toLocaleDateString("pt-BR"),
+            y: sumItens,
+        });
 
         config.data.datasets[0].data = dados;
         config.options.title.text = "Throughput";
