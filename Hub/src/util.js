@@ -188,8 +188,8 @@ function GetWiql(areaPath) {
     whereConditions += teamAreaPaths + ") ";
     return "SELECT [System.Id],[System.Title] " +
         "FROM WorkItems " +
-        //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 " +
-        "WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
+        "WHERE [Microsoft.VSTS.Common.ClosedDate] >= @Today - 120 " +
+        //"WHERE [Microsoft.VSTS.Common.ClosedDate] >= '01/01/2013' " +
         "AND " + whereConditions
 };
 

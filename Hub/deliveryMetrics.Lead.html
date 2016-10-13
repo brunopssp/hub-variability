@@ -68,9 +68,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         this.chart.update();
     }
 
-    var strWiql = "AND [System.State] ever '" + state + "'";
-
-    LoadWI(strWiql);
+    LoadWI("AND [System.State] ever '" + state + "'");
 
     function ResultQuery(resultQuery) {
 
@@ -95,7 +93,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             return workItemRevision.fields["System.State"] == "Done";
         });
 
-        var dateApproved = (RevApproved != null && RevApproved.fields != undefined) ? new Date(RevApproved.fields["System.ChangedDate"]) : new Date();
+        var dateApproved = (RevApproved != null && RevApproved.fields != undefined) ? new Date(RevApproved.fields["System.ChangedDate"]) : return;
         var dateDone = (RevDone != null && RevDone.fields != undefined) ? new Date(RevDone.fields["System.ChangedDate"]) : new Date();
 
         var produtionLeadTime = DaysBetween(dateApproved, dateDone)
@@ -122,12 +120,12 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             if (state == "New") {
                 state = "Approved";
                 // dados = new Array();
-                LoadWI(strWiql);
+                LoadWI("AND [System.State] ever '" + state + "'");
             } else
             if (state == "Approved") {
                 state = "Committed";
                 // dados = new Array();
-                LoadWI(strWiql);
+                LoadWI("AND [System.State] ever '" + state + "'");
             } else
             if (state == "Committed") {
 
