@@ -79,7 +79,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                 client.getRevisions(workItem.id).then(ProcessRevisions);
             });
         } else {
-            ShowChart();
+            UpdateState();
         };
     };
 
@@ -117,30 +117,33 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                 hidden: true,
                 data: dados
             });
-            if (state == "New") {
-                state = "Approved";
-                // dados = new Array();
-                LoadWI("AND [System.State] ever '" + state + "'");
-            } else
-            if (state == "Approved") {
-                state = "Committed";
-                // dados = new Array();
-                LoadWI("AND [System.State] ever '" + state + "'");
-            } else
-            if (state == "Committed") {
-
-                config.data.datasets = dataSet;
-                config.data.datasets[config.data.datasets.length - 1].hidden = false;
-
-                config.options.title.text = "Lead Time";
-                config.options.legend = {
-                    display: true,
-                    onClick: LegendClick
-                }
-
-                ShowChart();
-            }
+            UpdateState();
             dados = new Array();
+        }
+    }
+
+    function UpdateState() {
+        if (state == "New") {
+            state = "Approved";
+            // dados = new Array();
+            LoadWI("AND [System.State] ever '" + state + "'");
+        } else
+        if (state == "Approved") {
+            state = "Committed";
+            // dados = new Array();
+            LoadWI("AND [System.State] ever '" + state + "'");
+        } else
+        if (state == "Committed") {
+
+            config.data.datasets = dataSet;
+            config.data.datasets[config.data.datasets.length - 1].hidden = false;
+
+            config.options.title.text = "Lead Time";
+            config.options.legend = {
+                display: true,
+                onClick: LegendClick
+            }
+            ShowChart();
         }
     }
 </script>
