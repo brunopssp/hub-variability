@@ -83,7 +83,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             }
         }
         dados.push({
-            x: new Date(getDateRangeOfWeek(actual, closedDates[i].getFullYear())).toLocaleDateString("pt-BR"),
+            x: new Date(getDateRangeOfWeek(actual, closedDates[closedDates.length - 1].getFullYear())).toLocaleDateString("pt-BR"),
             y: sumItens,
         });
 
