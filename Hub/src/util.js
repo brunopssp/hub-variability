@@ -64,12 +64,16 @@ function computeStdDeviation(values, avg) {
 
 function LoadNotations(dadosDesP) {
     var maxData = 0;
+    var minData = 1000;
     var Avg = computeAvg(dadosDesP);
     var DesvP = computeStdDeviation(dadosDesP, Avg); //http://www.investpedia.com.br/artigo/O+que+e+desvio+padrao.aspx
 
     for (var i = dadosDesP.length; i--;) {
         if (dadosDesP[i].y > maxData) {
             maxData = dadosDesP[i].y;
+        };
+        if (dadosDesP[i].y < minData) {
+            minData = dadosDesP[i].y;
         };
     };
 
@@ -93,7 +97,7 @@ function LoadNotations(dadosDesP) {
                 borderColor: 'blue',
                 borderWidth: 2
             });
-            if (Avg - DesvP > 0) {
+            if (Avg - DesvP > minData) {
                 notations.push({
                     type: 'line',
                     mode: 'horizontal',
@@ -113,7 +117,7 @@ function LoadNotations(dadosDesP) {
                 borderColor: 'green',
                 borderWidth: 2
             });
-            if (Avg - (DesvP * 2) > 0) {
+            if (Avg - (DesvP * 2) > minData) {
                 notations.push({
                     type: 'line',
                     mode: 'horizontal',
