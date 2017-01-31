@@ -18,7 +18,7 @@ Date.prototype.getWeekNumber = function() {
 }; //http://stackoverflow.com/questions/6117814/get-week-of-year-in-javascript-like-in-php
 
 function getDateRangeOfWeek(weekNo, actualYear) {
-    var d1 = new Date(actualYear, 00, 01);
+    var d1 = new Date(actualYear, 00, 10);
     numOfdaysPastSinceLastMonday = eval(d1.getDay() - 1);
     d1.setDate(d1.getDate() - numOfdaysPastSinceLastMonday);
     var weekNoToday = d1.getWeekNumber();

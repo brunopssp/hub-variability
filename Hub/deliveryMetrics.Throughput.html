@@ -36,11 +36,10 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 
     var client = null;
 
-    var strWiql = "";
-    LoadWI(strWiql);
+    LoadWI("");
 
     function ResultQuery(resultQuery) {
-        //ForEach workItem in query, get the respective Revision
+        //ForEach workItem in query, get the respective ID
         if (resultQuery.workItems.length > 0) {
             var ids = new Array();
             resultQuery.workItems.forEach(function(workItem) {
@@ -68,7 +67,8 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         });
 
         var actual = closedDates[0].getWeekNumber();
-
+        
+        //Agrupa os itens de acordo com o número da semana
         for (var i = 0; i < closedDates.length; i++) {
             var weekday = closedDates[i].getWeekNumber();
             if (weekday == actual) {
