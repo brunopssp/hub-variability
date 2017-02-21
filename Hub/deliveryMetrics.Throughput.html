@@ -25,8 +25,8 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         <div title="Chart of delivery made by Team." class="backlog-page-title-area">Delivery Metrics</div>
     </div>
     <div class="right-hub-content" style="width: 100%; text-align: center; top: 45px">
-        <canvas width="888" height="444" id="canvas" style="width: 888px; height: 444px; display: inline;"></canvas>
-    </div>
+<canvas width="888" height="444" id="canvas" style="width: 888px; height: 444px; display: inline;"></canvas>
+</div>
 </body>
 <script>
     VSS.init({
@@ -42,7 +42,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         //ForEach workItem in query, get the respective ID
         if (resultQuery.workItems.length > 0) {
             var ids = new Array();
-            resultQuery.workItems.forEach(function(workItem) {
+            resultQuery.workItems.forEach(function (workItem) {
                 ids.push(workItem.id);
             });
             ids.splice(0, (ids.length - 1) - 240); //limit the process to 240 items
@@ -55,38 +55,31 @@ Please note: None of the conditions outlined in the disclaimer above will superc
     function processWorkItems(workItems) {
 
         var closedDates = new Array();
-        workItems.forEach(function(workItem) {
+        workItems.forEach(function (workItem) {
             closedDates.push(new Date(workItem.fields["Microsoft.VSTS.Common.ClosedDate"]));
+        });
+        closedDates.sort(function (a, b) {
+            return a - b;
         });
 
         var sumItens = 0;
         var dados = new Array();
-
-        closedDates.sort(function(a, b) {
-            return a - b;
-        });
-
         var actual = closedDates[0].getWeekNumber();
-        
+
         //Agrupa os itens de acordo com o número da semana
-        for (var i = 0; i < closedDates.length; i++) {
-            var weekday = closedDates[i].getWeekNumber();
-            if (weekday == actual) {
+        for (var i = 0; i <= closedDates.length; i++) {
+            if (closedDates[i].getWeekNumber() == actual) {
                 sumItens += 1;
             } else {
+                actual = closedDates[i].getWeekNumber();
+                i = i - 1;
                 dados.push({
-                    x: new Date(getDateRangeOfWeek(actual, closedDates[i].getFullYear())).toLocaleDateString("pt-BR"),
+                    x: new Date(getDateRangeOfWeek(closedDates[i].getWeekNumber(), closedDates[i].getFullYear())).toLocaleDateString("pt-BR"),
                     y: sumItens,
                 });
-                actual = weekday;
-                i = i - 1;
                 sumItens = 0;
             }
         }
-        dados.push({
-            x: new Date(getDateRangeOfWeek(actual, closedDates[closedDates.length - 1].getFullYear())).toLocaleDateString("pt-BR"),
-            y: sumItens,
-        });
 
         config.data.datasets[0].data = dados;
         config.options.title.text = "Throughput";
