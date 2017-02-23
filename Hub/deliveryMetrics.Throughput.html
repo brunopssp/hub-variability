@@ -67,7 +67,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
         var actual = closedDates[0].getWeekNumber();
 
         //Agrupa os itens de acordo com o número da semana
-        for (var i = 0; i <= closedDates.length; i++) {
+        for (var i = 0; i < closedDates.length; i++) {
             if (closedDates[i].getWeekNumber() == actual) {
                 sumItens += 1;
             } else {
@@ -80,6 +80,11 @@ Please note: None of the conditions outlined in the disclaimer above will superc
                 sumItens = 0;
             }
         }
+
+        dados.push({
+            x: new Date(getDateRangeOfWeek(closedDates.slice(-1)[0].getWeekNumber(), closedDates.slice(-1)[0].getFullYear())).toLocaleDateString("pt-BR"),
+            y: sumItens,
+        });
 
         config.data.datasets[0].data = dados;
         config.options.title.text = "Throughput";
